@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Exercise 3</title>
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="playlist.css">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body>
+    <!-- Fixed navbar -->
+	<nav class="navbar navbar-default navbar-fixed-top">
+      <!--<header>-->
+          <ul class="nav nav-tabs">
+    				<li id="library"><a href="/library"><span class="glyphicon glyphicon-music nav_icon" aria-hidden="true"></span><p>Library</p></a></li>
+    				<li id="playlists"><a href="/playlists"><span class="glyphicon glyphicon-th-list nav_icon" aria-hidden="true"></span><p>Playlists</p></a></li>
+    				<li id="search"><a href="/search"><span class="glyphicon glyphicon-search nav_icon" aria-hidden="true"></span><p>Search</p></a></li>
+          </ul>
+      <!--</header>-->
+	</nav>
+
+  <!-- Library -->
+  <div class="container" id="libraryHeader">
+    <section class="Library">
+      <div class="row" id="sortButtons">
+        <div class="librarySortButton" id="button1">
+          <p>Sort by artist</p>
+        </div>
+        <div class="librarySortButton" id="button2">
+          <p>Sort by title</p>
+        </div>
+      </div>
+      <!--              Song Segment               -->
+
+      <!--             End Song Segment            -->
+    </section>
+  </div>
+  <!-- End Library -->
+
+  <!-- Playlist -->
+	<div class="container" id="playlistsHeader">
+      <section class="Playlists">
+    		<div class="row" id="add_playlist">
+    			<span class="glyphicon glyphicon-plus"></span><p>Playlist</p>
+    		</div>
+
+      </section>
+  </div>
+    <!-- End Playlist -->
+
+    <!-- Search -->
+    <div class="container" id="searchHeader">
+      <div id="searchbar">
+        <input id= "searchField" type="text" placeholder="Search">
+      </div>
+    </div>
+    <!-- End Search -->
+    <!-- <script type="text/javascript" src="music-data.js"></script> -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script type="text/javascript" src="music-app.js"></script>
+  </body>
+</html>
