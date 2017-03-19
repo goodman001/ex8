@@ -1,0 +1,85 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+  line-height: 1.6;
+  margin: 0 auto;
+  padding: 0.5em;
+  color: #333;
+  font-family: "Helvetica", "Arial", sans-serif;
+}
+h1, h2, h3 {
+  line-height: 1.2;
+}
+
+p {
+    color: orange;
+    font-size: 12px;
+}
+
+.lists {
+    background-color: orange;
+}
+
+#playlist-list {
+    border: solid 10px grey;
+    padding: 10px;
+}
+
+.lists ul {
+    list-style: square outside none;
+}
+
+div {
+    color: grey;
+}
+
+div form label {
+    color: blue;
+}
+
+div #add-new {
+    color: red;
+}
+
+#playlist-list {
+    width: 360px;
+    padding: 20px;
+}
+
+.album-cover img {
+    width: 100px;
+    height: 100px;
+}
+
+#song-list {
+    position: relative;
+}
+
+.album-cover {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+#add-new-submit {
+    border: solid;
+}
+
+.active {
+    font-weight: bold;
+}
+
+.tab {
+    border: 1px solid black;
+    padding: 5px;
+}
+
+#feature-selector {
+    margin-bottom: 10px;
+}
+
+input {
+  border: 1px solid black;
+}

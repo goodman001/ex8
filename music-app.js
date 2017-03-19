@@ -264,6 +264,14 @@ function loadAPlaylistToSongsContainer(playlistID){
   songsContainer.innerHTML="";
   var playlistName = document.createElement("h4");
   playlistName.id="playlistNameInPlaylistPage";
+  //console.log(MUSIC_DATA.playlists);
+  for(var i =0;i<MUSIC_DATA.playlists.length;i++){
+    if(MUSIC_DATA.playlists[i].id == playlistID){
+      playlistName.innerHTML=MUSIC_DATA.playlists[i].name;
+      playlistID = i;
+      break;
+    }
+  }
   playlistName.innerHTML=MUSIC_DATA.playlists[playlistID].name;
   songsContainer.appendChild(playlistName);
   //console.log(playlists[playlistID]);
@@ -548,7 +556,13 @@ function songButtonsClicked(e){
       var songID = clickedObject.parentNode.childNodes[1].childNodes[2].innerHTML;
       var playerID = clickedObject.parentNode.childNodes[1].childNodes[3].innerHTML;
       console.log(songID);
-      $.post("/playlists/"+playerID,{'song': songID},function(status){
+      for(var i =0;i<MUSIC_DATA.playlists.length;i++){
+        if(MUSIC_DATA.playlists[i].id == playerID){
+          playerID = i;
+          break;
+        }
+      }
+      $.post("/playlists/"+playlists[playerID].id,{'song': songID},function(status){
           msgModal("Delete Status:",status);
           if(status.indexOf('not')<0)
           {
@@ -584,13 +598,19 @@ function modalClicked(e,songID){
     }
     else if (clickedObject.className=="overflow-ellipsis") {
       var playlistID = clickedObject.parentNode.childNodes[1].innerHTML;
+      for(var i =0;i<MUSIC_DATA.playlists.length;i++){
+        if(MUSIC_DATA.playlists[i].id == playlistID){
+          playlistID = i;
+          break;
+        }
+      }
       songID = parseInt(songID);
       if(playlists[playlistID].songs.indexOf(songID)==-1){
         playlists[playlistID].songs.push(songID);
       }
       var playlistName = (playlists[playlistID].name);
       var postStatus = "";
-      $.post('/api/playlists/'+playlistID,{'song':songID},function(status){
+      $.post('/api/playlists/'+playlists[playlistID].id,{'song':songID},function(status){
         postStatus = postStatus + status;
         removeGrayOverlay();
         removeModal();
@@ -714,6 +734,7 @@ function playlistsClicked(e){
       clickedObject = clickedObject.parentNode;
     }
     var playlistID = parseInt(clickedObject.children[3].textContent);
+    console.log(playlistID);
     playlistsContainer.style.display="none";
     loadAPlaylistToSongsContainer(playlistID);
   }

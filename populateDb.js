@@ -247,6 +247,7 @@ sequelize.sync().then(function() {
 exports.Song = Song;
 exports.Playlist = Playlist;
 exports.User = User;
+exports.Session = Session;
 
 
 
