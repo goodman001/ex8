@@ -2,6 +2,7 @@
 
 var fs        = require("fs");
 var path      = require("path");
+var bcrypt = require('bcrypt');
 fs.exists('music.db', function( exists ){
     if(exists == true)
     {
@@ -41,17 +42,28 @@ module.exports = db;
 var Song = sequelize.import('./model/Song.js');
 var Playlist = sequelize.import('./model/Playlist.js');
 var User = sequelize.import('./model/User.js');
+var Session = sequelize.import('./model/Session.js');
 
 Playlist.belongsToMany(Song, {through: 'Songs_Playlists', as:'Songs_Playlists'});
 Song.belongsToMany(Playlist, {through: 'Songs_Playlists', as:'Songs_Playlists'});
 
 User.belongsToMany(Playlist, {through: 'Users_Playlists', as:'Users_Playlists'});
 Playlist.belongsToMany(User, {through: 'Users_Playlists', as:'Users_Playlists'});
+
+Session.belongsTo(User, {as: 'sessionUser'});
 //sequelize.sync();
 var tmp = new Array();
 sequelize.sync().then(function() {
   // here comes your find command.
   /*create user*/
+  bcrypt.hash('123', 10, function(err, hash) {
+      User.create({username:'Foo',password:hash});
+  // Store hash in database
+  });
+  bcrypt.hash('456', 10, function(err, hash) {
+      User.create({username:'Bar',password:hash}); 
+  // Store hash in database
+  });
   //User.create({username:'Foo',password:'123'});
   //User.create({username:'Bar',password:'456'}); 
     var flags;
@@ -59,24 +71,43 @@ sequelize.sync().then(function() {
       var obj0 = JSON.parse(data);
       for(var i=0;i<obj0['playlists'].length;i++)
       {
+          Playlist.create({name:obj0['playlists'][i].name});
         //console.log(obj['playlists'][i].id);
-        Playlist.create({name:obj0['playlists'][i].name}).then(function(target){
-            if(target.dataValues.name=="90's Mega Mix"){
-               //console.log(target);
-               User.create({username:'Foo',password:'123'}).then(function(data){
-                      //console.log(data);
-                      Promise.all([
-                        target,
-                        data
-                      ]).then(function(results){
-                        var player = results[0];
-                        var usercell = results[1];
-                        usercell.addUsers_Playlists(player);
-                        return
-                      });
-                      return;
-                    });
-           }else if(target.dataValues.name=="Workout Tracks")
+         /*Playlist.create({name:obj0['playlists'][i].name}).then(function(target){
+            for(var i=0;i<obj0['playlists'].length;i++){
+              if(target.dataValues.name =="90's Mega Mix" && obj0['playlists'][i].name =="90's Mega Mix" ){
+                   //console.log(target);
+                   User.create({username:'Foo',password:'123'}).then(function(data){
+                          //console.log(data);
+                          Promise.all([
+                            target,
+                            data
+                          ]).then(function(results){
+                            var player = results[0];
+                            var usercell = results[1];
+                            usercell.addUsers_Playlists(player);
+                            return
+                          });
+                          return;
+                        });
+                }else if(target.dataValues.name =="Workout Tracks" && obj0['playlists'][i].name =="Workout Tracks"){
+                    //console.log(target);
+                   User.create({username:'Bar',password:'456'}).then(function(data){
+                          //console.log(data);
+                          Promise.all([
+                            target,
+                            data
+                          ]).then(function(results){
+                            var player = results[0];
+                            var usercell = results[1];
+                            usercell.addUsers_Playlists(player);
+                            return
+                          });
+                          return;
+                        });
+                }
+            
+           }*//*else if(target.dataValues.name=="Workout Tracks")
            {
                User.create({username:'Bar',password:'456'}).then(function(data){
                       //console.log(datas);
@@ -89,7 +120,7 @@ sequelize.sync().then(function() {
                         player.addUsers_Playlists(usercell);
                       });
                     });
-           }
+           }*/
            /*else if(target.dataValues.name=="Daft Punk mix")
            {
                User.findOne({username:'Bar'}).then(function(data){
@@ -103,9 +134,9 @@ sequelize.sync().then(function() {
                         player.addUsers_Playlists(usercell);
                       });
                     });
-           }*/
+           }
         
-        });
+        });*/
         
           
           
@@ -133,21 +164,58 @@ sequelize.sync().then(function() {
                 if((tmp['playlists'][z].id + 1) == target.dataValues.id)
                 {
                   //console.log(tmp['playlists'][z]['songs']);
-                  if(target.dataValues.name=="Daft Punk mix")
-                  {
-                      
-                  User.findOne({where: {username:'Bar'}}).then(function(data){
-                      console.log("###########");
-                      console.log(data);
-                      Promise.all([
-                        target,
-                        data
-                      ]).then(function(results){
-                        var player = results[0];
-                        var usercell = results[1];
-                        player.addUsers_Playlists(usercell);
-                      });
-                    });
+                  if(target.dataValues.name=="90's Mega Mix")
+                  { 
+                      User.findOne({where:{username:'Foo'}}).then(function(data){
+                          console.log("###########");
+                          console.log(data);
+                          Promise.all([
+                            target,
+                            data
+                          ]).then(function(results){
+                            var player = results[0];
+                            var usercell = results[1];
+                            player.addUsers_Playlists(usercell);
+                          });
+                        });
+                  }else if(target.dataValues.name=="Workout Tracks"){
+                      User.findOne({where:{username:'Bar'}}).then(function(data){
+                          console.log("###########");
+                          console.log(data);
+                          Promise.all([
+                            target,
+                            data
+                          ]).then(function(results){
+                            var player = results[0];
+                            var usercell = results[1];
+                            player.addUsers_Playlists(usercell);
+                          });
+                        });
+                  }else if(target.dataValues.name=="Daft Punk mix"){
+                      User.findOne({where:{username:'Foo'}}).then(function(data){
+                          console.log("###########");
+                          console.log(data);
+                          Promise.all([
+                            target,
+                            data
+                          ]).then(function(results){
+                            var player = results[0];
+                            var usercell = results[1];
+                            player.addUsers_Playlists(usercell);
+                          });
+                        });
+                      User.findOne({where:{username:'Bar'}}).then(function(data){
+                          console.log("###########");
+                          console.log(data);
+                          Promise.all([
+                            target,
+                            data
+                          ]).then(function(results){
+                            var player = results[0];
+                            var usercell = results[1];
+                            player.addUsers_Playlists(usercell);
+                          });
+                        });
                   }
                   for(var k = 0;k<tmp['playlists'][z]['songs'].length;k++){
                     Song.findById(tmp['playlists'][z]['songs'][k]+1).then(function(datas){
@@ -171,9 +239,10 @@ sequelize.sync().then(function() {
       });
       //console.log(obj['playlists'][0]['id']);
   });
+    
   
  
-})
+});
 
 exports.Song = Song;
 exports.Playlist = Playlist;
