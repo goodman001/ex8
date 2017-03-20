@@ -268,6 +268,7 @@ function loadAPlaylistToSongsContainer(playlistID){
   // document.body.appendChild=(playlistName);
   //console.log(playlistName);
   songsContainer.innerHTML="";
+  songsContainer.id="playlisttosongsdiv";
   var playlistName = document.createElement("h4");
   playlistName.id="playlistNameInPlaylistPage";
   //console.log(MUSIC_DATA.playlists);
@@ -578,6 +579,11 @@ function songButtonsClicked(e){
               if(playlists[playerID].songs[j] == songID)
               {
                 playlists[playerID].songs.splice(j,1);
+                /*socket del*/
+                var datas = {};
+                datas['songID'] = songID;
+                datas['playlistID'] = playerID;
+                socket.emit('delSongtoPlaylist', datas);//del song to playlist
                 break;
               }
             }
@@ -616,9 +622,10 @@ function modalClicked(e,songID){
       var datas={};
       datas['songID'] = songID;
       datas['playlistID'] = playlistID;
-      socket.emit('addSongtoPlaylist', datas);//add song to playlist
+      
       
       if(playlists[playlistID].songs.indexOf(songID)==-1){
+          socket.emit('addSongtoPlaylist', datas);//add song to playlist
           playlists[playlistID].songs.push(songID);
         }
       var playlistName = (playlists[playlistID].name);
@@ -754,7 +761,83 @@ function playlistsClicked(e){
   e.stopPropagation();
 }
 socket.on('receiveSongsForPlaylist', function(data) {
-    console.log("hahah");
+    //console.log("hahah");
+    console.log(data);
+    var songsContainer = document.getElementById("playlisttosongsdiv");
+    var playlistID = data.playlistID;
+    var songID = data.songID;
+  
+    playlists[playlistID].songs.push(songID);
+    var songObj = MUSIC_DATA.songs[parseInt(songID)];
+    var individualDiv = document.createElement("div");
+    var coverimg=document.createElement("img");
+    individualDiv.className = "songperson";
+    /*pic num*/
+    Math.random()*10
+    var num = Math.random()*10 + 0;
+    var pic = parseInt(num, 10);
+    var path = "covers/" + pic + ".png";
+    coverimg.src=path;
+    coverimg.alt = "list_image_placeholder";
+    var songInfoDiv = document.createElement("div");
+    songInfoDiv.className = "songInfo";
+    var songNameh4 = document.createElement("h4");
+    var songNameHolder = document.createTextNode(songObj.title);
+    songNameh4.appendChild(songNameHolder);
+    var artistP = document.createElement("p");
+    var artistHolder = document.createTextNode(songObj.artist);
+    artistP.appendChild(artistHolder);
+    artistP.className="overflow-ellipsis";
+    var songId = document.createElement("p");
+    var songIDtemp = document.createTextNode(songObj.id);
+    songId.appendChild(songIDtemp);
+    songId.style.display="none";
+    songId.className="hiddenSongIDinSongs";
+    var playerId = document.createElement("p");
+    var playerIDtemp = document.createTextNode(MUSIC_DATA.playlists[playlistID].id);
+    playerId.appendChild(playerIDtemp);
+    playerId.style.display="none";
+    playerId.className="hiddenSongIDinSongs";
+
+    var playButtonSpan = document.createElement("span");
+    var addButtonSpan = document.createElement("span");
+    var delButtonSpan = document.createElement("span");
+    playButtonSpan.className=("glyphicon glyphicon-play songPlayButton");
+    addButtonSpan.className=("glyphicon glyphicon-plus-sign songAddButton");
+    delButtonSpan.className=("glyphicon glyphicon-remove-circle songDelButton");
+    songInfoDiv.appendChild(songNameh4);
+    songInfoDiv.appendChild(artistP);
+    songInfoDiv.appendChild(songId);
+    songInfoDiv.appendChild(playerId);
+    individualDiv.appendChild(coverimg);
+    individualDiv.appendChild(songInfoDiv);
+    individualDiv.appendChild(playButtonSpan);
+    individualDiv.appendChild(addButtonSpan);
+    individualDiv.appendChild(delButtonSpan);
+    songsContainer.appendChild(individualDiv);
         //loadAPlaylistToSongsContainer(data.playlistID);
         
       });
+/*socket del receieve*/
+socket.on('receiveDelSongsForPlaylist', function(data) {
+  var songsContainer = document.getElementById("playlisttosongsdiv");
+  var songPersons =  $(".songperson");
+  //console.log(songPersons.length);
+  var flag = -1;
+  for(var i=0;i<songPersons.length;i++)
+  {
+    var target = $(songPersons[i]).find('p')[1];
+    if($(target).text() == data.songID){
+      $(songPersons[i]).remove();
+    }
+  }
+  for(var j=0;j<playlists[data.playlistID].songs.length;j++)
+  {
+    if(playlists[data.playlistID].songs[j] == data.songID)
+    {
+      playlists[data.playlistID].songs.splice(j,1);
+      break;
+    }
+  }
+  
+});

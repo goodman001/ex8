@@ -28,18 +28,7 @@ var generateKey = function(){
   sha.update(Math.random().toString());
   return sha.digest('hex');
 };
-var checkSession = function(sessionKey){
-  if(sessionKey == undefined)
-  {
-    return null;
-  }else{
-      console.log(sessionKey);
-      Session.findOne({'where':{ 'sessionKey':sessionKey},raw: true}).then(function(res){
-        console.log(res);
-        return res.sessionUserId;
-      });
-  }
-};
+
 var getAppHttp = function(request, response) {
     
     var sessionKey = request.cookies.sessionKey;
@@ -538,9 +527,71 @@ app.post('/login/',function(req,resquest){
 /*socket io*/
 io.on('connection', function(socket) {
     console.log('a user connected!');
+    /*auth*/
+    var sessionKey = '';
+    var arrs=[];
+    var cookie=socket.handshake.headers['cookie'];
+    var findflag = -1;
+    arrs=cookie.split(";");
+    for(var i=0;i<arrs.length;i++){
+      if(arrs[i].indexOf('sessionKey')>-1){
+        findflag =i;
+        break;
+      }
+    }
+    console.log(arrs);
+    if(findflag>=0)
+    {
+      sessionKey = arrs[findflag].replace("sessionKey=", "");
+    }
+    
+  
+  
     socket.on('addSongtoPlaylist', function(data){
       console.log(data);
-      socket.broadcast.emit('receiveSongsForPlaylist', data);
+      /*auth*/
+      if(sessionKey != null && sessionKey !=undefined)
+      {
+          Session.findOne({'where':{ 'sessionKey':sessionKey},raw: true}).then(function(res){
+            console.log("##########################");
+            if(res != null){
+              User.findOne({'where':{ 'id':res.sessionUserId}}).then(function(userinfo){
+                  Promise.all([
+                    userinfo
+                  ]).then(function(results){
+                    var user = results[0];
+                    user.getUsers_Playlists({raw: true}).then(function(rr){
+                      var pflag = 0;
+                      for(var i=0;i<rr.length;i++){
+                        console.log(rr);
+                        if(rr[i].id == data.playlistID)
+                        {
+                          pflag =1;
+                          break;
+                        }
+                      }
+                      if(pflag == 1)
+                      {
+                        socket.broadcast.emit('receiveSongsForPlaylist', data);
+                      }
+                    });
+                  });
+              });
+            console.log(res);
+            }
+          });
+
+      }else
+      {
+        console.log("auth permission");
+      }
+      
+      
+      
+    });
+    socket.on('delSongtoPlaylist', function(data){
+      console.log(data);
+      socket.broadcast.emit('receiveDelSongsForPlaylist', data);
     });
     //socket.on('my other event', function (data) {
         //console.log(data);
