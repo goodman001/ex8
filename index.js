@@ -6,6 +6,7 @@ var crypto = require('crypto');
 var express = require('express');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
+var EventEmitter = require('events').EventEmitter;
 var app = express();
 
 
@@ -18,6 +19,10 @@ app.use(bodyParser.urlencoded({   // to support URL-encoded bodies
   extended: true
 }));
 app.use(cookieParser());
+/*socket*/
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
+
 var generateKey = function(){
   var sha  = crypto.createHash('sha256');
   sha.update(Math.random().toString());
@@ -530,6 +535,23 @@ app.post('/login/',function(req,resquest){
     
 });
 
-app.listen(3000, function () {
+/*socket io*/
+io.on('connection', function(socket) {
+    console.log('a user connected!');
+    socket.on('addSongtoPlaylist', function(data){
+      console.log(data);
+      socket.broadcast.emit('receiveSongsForPlaylist', data);
+    });
+    //socket.on('my other event', function (data) {
+        //console.log(data);
+      //});
+    /*socket.on('getSongsForPlaylist', function(playlistId) {
+        console.log('Got request for playlist ' + playlistId);
+        getSongs(function(songData) {
+            socket.emit('receiveSongsForPlaylist', JSON.stringify(songData));
+        })
+    });*/
+});
+server.listen(3000, function () {
   console.log('Example app listening on port 3000! Open and accepting connections until someone kills this process');
 })

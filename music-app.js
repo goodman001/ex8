@@ -42,6 +42,12 @@ $.get('/api/songs',function(data){
   songsLoaded = true;
   attemptRunApplication();
 });
+/*socket io*/
+var socket = io('/');   
+socket.on('news', function (data) {    
+  alert(data.hello);
+  socket.emit('my other event', { my: 'data' });
+});
 
 function enableNavBar(){
   navbar.addEventListener("click",navbarClicked,false);
@@ -551,6 +557,7 @@ function songButtonsClicked(e){
       var songID = clickedObject.parentNode.childNodes[1].childNodes[2].innerHTML;
       popGrayOverlay();
       popModal(songID);
+
     }else if(clickedObject.className=="glyphicon glyphicon-remove-circle songDelButton")
     {
       var songID = clickedObject.parentNode.childNodes[1].childNodes[2].innerHTML;
@@ -597,6 +604,7 @@ function modalClicked(e,songID){
       removeModal();
     }
     else if (clickedObject.className=="overflow-ellipsis") {
+      
       var playlistID = clickedObject.parentNode.childNodes[1].innerHTML;
       for(var i =0;i<MUSIC_DATA.playlists.length;i++){
         if(MUSIC_DATA.playlists[i].id == playlistID){
@@ -605,9 +613,14 @@ function modalClicked(e,songID){
         }
       }
       songID = parseInt(songID);
+      var datas={};
+      datas['songID'] = songID;
+      datas['playlistID'] = playlistID;
+      socket.emit('addSongtoPlaylist', datas);//add song to playlist
+      
       if(playlists[playlistID].songs.indexOf(songID)==-1){
-        playlists[playlistID].songs.push(songID);
-      }
+          playlists[playlistID].songs.push(songID);
+        }
       var playlistName = (playlists[playlistID].name);
       var postStatus = "";
       $.post('/api/playlists/'+playlists[playlistID].id,{'song':songID},function(status){
@@ -740,3 +753,8 @@ function playlistsClicked(e){
   }
   e.stopPropagation();
 }
+socket.on('receiveSongsForPlaylist', function(data) {
+    console.log("hahah");
+        //loadAPlaylistToSongsContainer(data.playlistID);
+        
+      });
