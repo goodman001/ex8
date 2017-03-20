@@ -89,21 +89,6 @@ var getAPISongs = function(request, response){
   });*/
   // console.log("Responded Songs API");
 };
-/*
-var playtest = function(request,response){
-  response.statusCode = 200;
-  response.setHeader('Content-Type','application/json');
-  response.setHeader('Cache-Control','max-age=1800');
-  Playlist.findAll({raw: true}).then(function(playlist) {
-    var dic = new Array();
-    dic= {'playlists':playlist};
-    console.log(dic.toString());
-    response.end(JSON.stringify(dic));
-  });
-  //console.log("Responded Songs API");
-  //console.log(response);
-  // console.log("responded API playlist");
-};*/
 var getAPIPlaylists = function(request,response){
   response.statusCode = 200;
   response.setHeader('Content-Type','application/json');
@@ -164,10 +149,7 @@ var getAPIPlaylists = function(request,response){
 
                                   //console.log(JSON.stringify(player));
                                 });
-                    }
-                                    
-                                    
-                                    
+                    }                 
                   });
                 });
               });
@@ -527,7 +509,7 @@ app.post('/login/',function(req,resquest){
 /*socket io*/
 io.on('connection', function(socket) {
     console.log('a user connected!');
-    /*auth*/
+    /*get cookie value*/
     var sessionKey = '';
     var arrs=[];
     var cookie=socket.handshake.headers['cookie'];
@@ -539,21 +521,19 @@ io.on('connection', function(socket) {
         break;
       }
     }
-    console.log(arrs);
+    //console.log(arrs);
     if(findflag>=0)
     {
       sessionKey = arrs[findflag].replace("sessionKey=", "");
     }
-    
-  
-  
     socket.on('addSongtoPlaylist', function(data){
-      console.log(data);
+      //console.log(data);
       /*auth*/
       if(sessionKey != null && sessionKey !=undefined)
       {
+        //console.log(sessionKey);
           Session.findOne({'where':{ 'sessionKey':sessionKey},raw: true}).then(function(res){
-            console.log("##########################");
+            //console.log(res);
             if(res != null){
               User.findOne({'where':{ 'id':res.sessionUserId}}).then(function(userinfo){
                   Promise.all([
@@ -561,10 +541,11 @@ io.on('connection', function(socket) {
                   ]).then(function(results){
                     var user = results[0];
                     user.getUsers_Playlists({raw: true}).then(function(rr){
+                      console.log(rr);
                       var pflag = 0;
                       for(var i=0;i<rr.length;i++){
                         console.log(rr);
-                        if(rr[i].id == data.playlistID)
+                        if(rr[i].id == parseInt(data.playlistID)+1)
                         {
                           pflag =1;
                           break;
@@ -577,7 +558,7 @@ io.on('connection', function(socket) {
                     });
                   });
               });
-            console.log(res);
+            //console.log(res);
             }
           });
 
@@ -590,18 +571,46 @@ io.on('connection', function(socket) {
       
     });
     socket.on('delSongtoPlaylist', function(data){
-      console.log(data);
-      socket.broadcast.emit('receiveDelSongsForPlaylist', data);
+      //console.log(data);
+      if(sessionKey != null && sessionKey !=undefined)
+      {
+        /*auth*/
+        //console.log(sessionKey);
+          Session.findOne({'where':{ 'sessionKey':sessionKey},raw: true}).then(function(res){
+            //console.log(res);
+            if(res != null){
+              User.findOne({'where':{ 'id':res.sessionUserId}}).then(function(userinfo){
+                  Promise.all([
+                    userinfo
+                  ]).then(function(results){
+                    var user = results[0];
+                    user.getUsers_Playlists({raw: true}).then(function(rr){
+                      console.log(rr);
+                      var pflag = 0;
+                      for(var i=0;i<rr.length;i++){
+                        console.log(rr);
+                        if(rr[i].id == parseInt(data.playlistID)+1)
+                        {
+                          pflag =1;
+                          break;
+                        }
+                      }
+                      if(pflag == 1)
+                      {
+                        socket.broadcast.emit('receiveDelSongsForPlaylist', data);
+                      }
+                    });
+                  });
+              });
+            //console.log(res);
+            }
+          });
+
+      }else
+      {
+        console.log("auth permission");
+      }  
     });
-    //socket.on('my other event', function (data) {
-        //console.log(data);
-      //});
-    /*socket.on('getSongsForPlaylist', function(playlistId) {
-        console.log('Got request for playlist ' + playlistId);
-        getSongs(function(songData) {
-            socket.emit('receiveSongsForPlaylist', JSON.stringify(songData));
-        })
-    });*/
 });
 server.listen(3000, function () {
   console.log('Example app listening on port 3000! Open and accepting connections until someone kills this process');
